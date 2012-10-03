@@ -3,6 +3,15 @@
  */
 {
 	"enabled": true,
-    "lessFile": "static/less/main.less", // Relative to project directory
-    "cssFile": "static/css/output.css"   // Relative to project directory
+    // All files are relative to project directory
+    "targets": [
+        {
+            "less": "in1.less",
+            "css": "out1.css"
+        },
+        {
+            "less": "in2.less",
+            "css": "out2.css"
+        }
+    ]
 }

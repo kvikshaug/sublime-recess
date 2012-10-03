@@ -3,20 +3,24 @@ import subprocess
 
 class CompileLessWithRecessCommand(sublime_plugin.TextCommand):
     def run(self, text):
+        project_folder = sublime.active_window().folders()[0]
         settings = sublime.load_settings('recess.sublime-settings')
-        less_file = "%s/%s" % (sublime.active_window().folders()[0], settings.get("lessFile"))
-        css_file = "%s/%s" % (sublime.active_window().folders()[0], settings.get("cssFile"))
+        targets = settings.get("targets")
+        errors = False
+        for target in targets:
+            cmd = ["recess", "--compile", "--compress", "%s/%s" % (project_folder, target['less'])]
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            result = p.communicate()[0]
+            if result == "":
+                errors = True
+            else:
+                print("Compiling less file %s/%s" % (project_folder, target['less']))
+                print("Writing compiled css: %s/%s" % (project_folder, target['css']))
+                with open("%s/%s" % (project_folder, target['css']), 'wt') as f:
+                    f.write(result)
+        if errors:
+            sublime.error_message("Couldn't compile one or more .less files, parse error? Try running recess manually.")
 
-        cmd = ["recess", "--compile", "--compress", less_file]
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-        result = p.communicate()[0]
-        if result == "":
-            sublime.error_message("Couldn't compile .less files, parse error? Try running recess manually on %s" % less_file)
-        else:
-            print("Compiling less file %s" % less_file)
-            print("Writing compiled css: %s" % css_file)
-            with open(css_file, 'wt') as f:
-                f.write(result)
 
 class LessToCssSave(sublime_plugin.EventListener):
     def on_post_save(self, view):
