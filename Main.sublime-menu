@@ -1,0 +1,21 @@
+[
+  {
+    "id": "preferences",
+    "children":
+    [
+      {
+        "id": "package-settings",
+        "children":
+        [
+          {
+            "caption": "Recess settings",
+            "command": "open_file", "args":
+            {
+                "file": "${packages}/recess/recess.sublime-settings"
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

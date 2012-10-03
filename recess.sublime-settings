@@ -1,0 +1,8 @@
+/**
+ * Recess default settings
+ */
+{
+	"enabled": true,
+    "lessFile": "static/less/main.less", // Relative to project directory
+    "cssFile": "static/css/output.css"   // Relative to project directory
+}
