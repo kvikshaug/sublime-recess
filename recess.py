@@ -10,6 +10,11 @@ class CompileOnSave(sublime_plugin.EventListener):
 
 class CompileLessWithRecessCommand(sublime_plugin.TextCommand):
     def run(self, text):
+        thread = CompilerThread()
+        thread.start()
+
+class CompilerThread(threading.Thread):
+    def run(self):
         project_folder = sublime.active_window().folders()[0]
         settings = sublime.load_settings('recess.sublime-settings')
         targets = settings.get("targets")
@@ -27,3 +32,4 @@ class CompileLessWithRecessCommand(sublime_plugin.TextCommand):
                     f.write(result)
         if errors:
             sublime.error_message("Couldn't compile one or more .less files, parse error? Try running recess manually.")
+        sublime.status_message("Saved compiled css from less.")
