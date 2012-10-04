@@ -15,6 +15,7 @@ class CompileLessWithRecessCommand(sublime_plugin.TextCommand):
 
 class CompilerThread(threading.Thread):
     def run(self):
+        sublime.status_message("Compiling .less files...")
         project_folder = sublime.active_window().folders()[0]
         settings = sublime.load_settings('recess.sublime-settings')
         targets = settings.get("targets")
