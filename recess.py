@@ -1,5 +1,12 @@
 import sublime, sublime_plugin
-import subprocess
+import subprocess, threading
+
+class CompileOnSave(sublime_plugin.EventListener):
+    def on_post_save(self, view):
+        settings = sublime.load_settings('recess.sublime-settings')
+        if settings.get('enabled', False):
+            if view.file_name()[-5:] == ".less":
+                view.run_command("compile_less_with_recess")
 
 class CompileLessWithRecessCommand(sublime_plugin.TextCommand):
     def run(self, text):
@@ -20,11 +27,3 @@ class CompileLessWithRecessCommand(sublime_plugin.TextCommand):
                     f.write(result)
         if errors:
             sublime.error_message("Couldn't compile one or more .less files, parse error? Try running recess manually.")
-
-
-class LessToCssSave(sublime_plugin.EventListener):
-    def on_post_save(self, view):
-        settings = sublime.load_settings('recess.sublime-settings')
-        if settings.get('enabled', False):
-            if view.file_name()[-5:] == ".less":
-                view.run_command("compile_less_with_recess")
