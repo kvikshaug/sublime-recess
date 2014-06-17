@@ -11,26 +11,36 @@ class CompileOnSave(sublime_plugin.EventListener):
 class CompileLessWithRecessCommand(sublime_plugin.TextCommand):
     def run(self, text):
         thread = CompilerThread()
+        thread.targets = sublime.load_settings('recess.sublime-settings').get("targets")
+        thread.project_folder = sublime.active_window().folders()[0]
         thread.start()
 
 class CompilerThread(threading.Thread):
     def run(self):
-        sublime.status_message("Compiling .less files...")
-        project_folder = sublime.active_window().folders()[0]
-        settings = sublime.load_settings('recess.sublime-settings')
-        targets = settings.get("targets")
+        sublime.set_timeout(self.status_start, 0)
         errors = False
-        for target in targets:
-            cmd = ["recess", "--compile", "--compress", "%s/%s" % (project_folder, target['less'])]
+        for target in self.targets:
+            cmd = ["recess", "--compile", "--compress", "%s/%s" % (self.project_folder, target['less'])]
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
             result = p.communicate()[0]
             if result == "":
                 errors = True
             else:
-                print("Compiling less file %s/%s" % (project_folder, target['less']))
-                print("Writing compiled css: %s/%s" % (project_folder, target['css']))
-                with open("%s/%s" % (project_folder, target['css']), 'wt') as f:
+                print("Compiling less file %s/%s" % (self.project_folder, target['less']))
+                print("Writing compiled css: %s/%s" % (self.project_folder, target['css']))
+                with open("%s/%s" % (self.project_folder, target['css']), 'wt') as f:
                     f.write(result)
+
         if errors:
-            sublime.error_message("Couldn't compile one or more .less files, parse error? Try running recess manually.")
+            sublime.set_timeout(self.status_end_error, 0)
+        else:
+            sublime.set_timeout(self.status_end_success, 0)
+
+    def status_start(self):
+        sublime.status_message("Compiling .less files...")
+
+    def status_end_success(self):
         sublime.status_message("Saved compiled css from less.")
+
+    def status_end_error(self):
+        sublime.error_message("Couldn't compile one or more .less files, parse error? Try running recess manually.")
